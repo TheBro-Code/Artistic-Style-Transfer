@@ -69,10 +69,9 @@ function output = style_transfer(content_img, ...
                 S = style_patch{i,j};
                 
                 R_new = [R_1;R_2;R_3];
-                S_new = [S(:,:,1);S(:,:,2);S(:,:,3)];
+                S_new = [S(:,:,1);S(:,:,2);S(:,:,3)]
                 
                 [Id,D] = knnsearch(S_new,R_new);
-                
                 
                 
             end
