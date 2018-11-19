@@ -1,5 +1,4 @@
 clear; clc;
-
 tic;
 
 %% Inputs
@@ -57,14 +56,5 @@ subplot(1,3,3), imshow(stylised_result);
 %%
 
 toc;
-
-
-
-
-
-
-
-
-
 
 
