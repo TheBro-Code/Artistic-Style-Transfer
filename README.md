@@ -1,2 +1,2 @@
 # Artistic-Style-Transfer
-CS-631 Course Project implementing Artistic Style Transfer
+CS-663 Course Project implementing Artistic Style Transfer
