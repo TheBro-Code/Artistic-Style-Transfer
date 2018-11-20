@@ -6,7 +6,7 @@ tic;
 % reading content and style image
 
 content_img = imread('../images/content/lena.jpg');
-style_img = imread('../images/styles/pencil.jpg');
+style_img = imread('../images/styles/starry-night - small.jpg');
 
 % segmentation mask 
 
