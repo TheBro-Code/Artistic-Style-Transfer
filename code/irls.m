@@ -5,9 +5,9 @@ function X_tilda = irls(X,style_patch,patch_size,r,IRLS_itr,size)
     d = size(3);
     num_patches = (h-patch_size+1)*(w-patch_size+1);
 
-    proj_mat = style_patch(1);
-    S_eig = style_patch(2);
-    mean_data = style_patch(3);
+    proj_mat = style_patch.proj_mat;
+    S_eig = style_patch.S_eig;
+    mean_data = style_patch.mean_data;
    
     X_itr = X;
     
