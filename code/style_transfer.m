@@ -34,23 +34,20 @@ function output = style_transfer(content_img, ...
     for i = 1 : L_max
         for j = 1 : size(patch_sizes)
             
-            
-            
             img1 = im2col(style_pyramid{i}(:,:,1), ...
                     [patch_sizes(j),patch_sizes(j)]);
             
-            img = zeros(size(img1,1),size(img1,2),3);
-            img(:,:,1) = img1(:,:);
-            
             img2 = im2col(style_pyramid{i}(:,:,2), ... 
                     [patch_sizes(j),patch_sizes(j)]);
-            img(:,:,2) = img2(:,:);
            
             img3 = im2col(style_pyramid{i}(:,:,3), ... 
                     [patch_sizes(j),patch_sizes(j)]);
-            img(:,:,3) = img3(:,:);
             
-            style_patch{i,j} = img; 
+            img = [img1;img2;img3];
+            
+            pca_dimension = 75;
+            style_patch{i,j} = pca_reduction(img,pca_dimension);
+             
         end
     end
     

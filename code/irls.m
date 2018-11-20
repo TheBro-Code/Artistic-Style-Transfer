@@ -4,15 +4,16 @@ function X_tilda = irls(X,style_patch,patch_size,r,IRLS_itr,size)
     w = size(2);
     d = size(3);
     num_patches = (h-patch_size+1)*(w-patch_size+1);
-    
-     S_new = [style_patch(:,:,1); style_patch(:,:,2); style_patch(:,:,3)];
-%     S_new((i-1)*patch_size*patch_size+1:i*patch_size*patch_size,:) = style_patch(:,:,i);
-%     end
+
+    proj_mat = style_patch(1);
+    S_eig = style_patch(2);
+    mean_data = style_patch(3);
    
     X_itr = X;
     
     for i = 1:IRLS_itr
         
+        i
         X_itr = reshape(X_itr, size);
         
         R_1 = im2col(X_itr(:,:,1),[patch_size,patch_size]);
@@ -20,23 +21,29 @@ function X_tilda = irls(X,style_patch,patch_size,r,IRLS_itr,size)
         R_3 = im2col(X_itr(:,:,3),[patch_size,patch_size]);
         R_new = [R_1;R_2;R_3];
         
-        [Id,D] = nearest_neighbour(S_new,R_new);
-        w_itr = D.^(r-2) + (1e-9);
-        c_itr = sum(w_itr);
+        R_new = R_new - repmat(mean_data,[1,size(R_new,2)]);
+        R_eig = (proj_mat')*R_new;
         
-        term1 = zeros(d*w*h,d*w*h);
+        [Id,D] = nearest_neighbour(S_eig,R_eig);
+        w_itr = D.^(r-2);
+        
+        term1 = zeros(1,d*w*h);
         term2 = zeros(d*w*h,1);
         
         for j = 1:num_patches
+            j
+            tic;
             R_j = patch_transform(size,patch_size,j);
-            term1 = term1 + w_itr(j)*(R_j'*R_j);
-            term2 = term2 + w_itr(j)*(R_j'*S_new(:,Id(j)));
+            toc;
+            tic;
+            term1 = term1 + sum(R_j,1).*w_itr(j);
+            toc;
+            tic;
+            term2 = term2 + w_itr(j)*(R_j'*S_eig(:,Id(j)));
+            toc;
         end
         
-        term1 = term1 / c_itr;
-        term2 = term2 / c_itr;
-        
-        X_itr = term1\term2;
+        X_itr = (term2)./(term1');
         
     end
     

@@ -19,7 +19,7 @@ end
     
 out = zeros(d*p*p,d*m*n);
 
-for i = 1:c
+for i = 1:d
     out((i-1)*p*p + 1 :i*p*p,(i-1)*m*n + 1 : i*m*n) = R; 
 end
 
