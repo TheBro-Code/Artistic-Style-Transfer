@@ -20,11 +20,11 @@ L_max = 3;
 
 % patch sizes
 
-patch_sizes = [33, 21, 13, 9];
+patch_sizes = [33;21;13;9];
 
 % sub_sampling gaps
 
-sub_sampling_gaps = [28, 18, 8, 5];
+sub_sampling_gaps = [28;18;8;5];
 
 % Number of IRLS iterations
 

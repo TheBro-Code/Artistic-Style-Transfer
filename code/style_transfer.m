@@ -30,10 +30,11 @@ function output = style_transfer(content_img, ...
     
     %% Building patch_matrices for style image for all L,n
     
-    style_patch = cell(L_max,size(patch_sizes, 2));
+    style_patch = cell(L_max,length(patch_sizes));
     for i = 1 : L_max
-        for j = 1 : size(patch_sizes,2)
-            
+        i
+        for j = 1 : length(patch_sizes)
+            j
             img1 = im2col(style_pyramid{i}(:,:,1), ...
                     [patch_sizes(j),patch_sizes(j)]);
             
@@ -45,8 +46,9 @@ function output = style_transfer(content_img, ...
             
             img = [img1;img2;img3];
             
-            pca_dimension = 75;
-            style_patch{i,j} = pca_reduction(img,pca_dimension);
+%             pca_dimension = 75;
+%             style_patch{i,j} = pca_reduction(img,pca_dimension);
+            style_patch{i,j} = img;
              
         end
     end
@@ -62,7 +64,7 @@ function output = style_transfer(content_img, ...
     
     for i = 1:L_max
         % Loop over Patch-sizes
-        for j = 1:size(patch_sizes,2)
+        for j = 1:length(patch_sizes)
             
             for k = 1:I_alg
                 k
