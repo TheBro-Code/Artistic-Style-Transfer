@@ -14,7 +14,6 @@ threshold = 0.03;
 sigma_edge = 1;
 sigma_blur = 3;
 seg_mask = segmentation_mask(content_img,threshold,sigma_edge,sigma_blur);
-
 % Number of resolution layers
 
 L_max = 3;
@@ -46,12 +45,12 @@ stylised_result = style_transfer(content_img, ...
                                  L_max, ...
                                  seg_mask, ...
                                  patch_sizes, ...
-                                 sub_sampling_gaps(2), ...
+                                 sub_sampling_gaps(1), ...
                                  IRLS_itr,I_alg,r);
 
-subplot(1,3,1), imshow(content_img);
-subplot(1,3,2), imshow(style_img);
-subplot(1,3,3), imshow(stylised_result);
+subplot(1,3,1), imagesc(content_img);
+subplot(1,3,2), imagesc(style_img);
+subplot(1,3,3), imagesc(stylised_result);
 
 %%
 
