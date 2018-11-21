@@ -5,9 +5,8 @@ function output = style_transfer(content_img, ...
                                  L_max, ...
                                  seg_mask, ...
                                  patch_sizes, ...
-                                 sub_sampling_gap, ...
+                                 sub_sampling_gaps, ...
                                  IRLS_itr,I_alg,r)
-                             
     %% Initialisation                          
     content_init = imhistmatch(content_img,style_img);
     
@@ -32,9 +31,9 @@ function output = style_transfer(content_img, ...
     
     style_patch = cell(L_max,length(patch_sizes));
     for i = 1 : L_max
-        i
         for j = 1 : length(patch_sizes)
-            j
+            [h,w,d] = size(style_pyramid{i});
+            
             img1 = im2col(style_pyramid{i}(:,:,1), ...
                     [patch_sizes(j),patch_sizes(j)]);
             
@@ -45,7 +44,9 @@ function output = style_transfer(content_img, ...
                     [patch_sizes(j),patch_sizes(j)]);
             
             img = [img1;img2;img3];
-            
+            img = reshape(img,3*patch_sizes(j)*patch_sizes(j),(h-patch_sizes(j)+1),(w-patch_sizes(j)+1));
+            img = img(:,1:5:end,1:5:end);
+            img = reshape(img,3*patch_sizes(j)*patch_sizes(j),[]);
 %             pca_dimension = 75;
 %             style_patch{i,j} = pca_reduction(img,pca_dimension);
             style_patch{i,j} = img;
@@ -64,47 +65,38 @@ function output = style_transfer(content_img, ...
     
     for i = 1:L_max
         % Loop over Patch-sizes
+        resolution_level = i
         for j = 1:length(patch_sizes)
-            
+            patch_no = j
             for k = 1:I_alg
-                k
                 X_tilda = irls(X_hat,style_patch{i,j},patch_sizes(j),r,...
-                    IRLS_itr,size(content_pyramid{i}),sub_sampling_gap);
+                    IRLS_itr,size(content_pyramid{i}),sub_sampling_gaps(j));
                 
                 mask = repmat(reshape(seg_mask_pyramid{i},[],1), 3, 1);
-                tic;
                 X_hat = (X_tilda + double(mask).*double(reshape(content_pyramid{i},[],1)))./(mask + ones(size(mask)));
-                toc;
-                tic;
                 X_hat = imhistmatch(reshape(X_hat, ...
                     size(content_pyramid{i})), style_pyramid{i});
-                toc;
-                tic;
                 [thr,sorh,keepapp] = ddencmp('den','wv',X_hat);
-                toc;
-                tic;
                 X_hat = wdencmp('gbl',X_hat,'sym4',2,thr,sorh,keepapp);
-                toc;
-                tic;
                 X_hat = reshape(X_hat, [], 1);
-                toc;
             end
             
         end
-        X_hat = reshape(X_hat, size(content_pyramid{i}));
-        [m,n,d] = size(X_hat);
-        X_hat = impyramid(X_hat, 'expand');
-        if rem(m,2)==0 && rem(n,2)==0
-            X_hat = imresize(X_hat,[2*m 2*n]);
-        elseif rem(m,2)==0 || rem(n,2)==0
-            if rem(m,2)==0
-                X_hat = imresize(X_hat,[2*m 2*n-1]);
-            else
-                X_hat = imresize(X_hat,[2*m-1 2*n]);
+        if (i~=L_max)
+            X_hat = reshape(X_hat, size(content_pyramid{i}));
+            [m,n,d] = size(X_hat);
+            X_hat = impyramid(X_hat, 'expand');
+            if rem(m,2)==0 && rem(n,2)==0
+                X_hat = imresize(X_hat,[2*m 2*n]);
+            elseif rem(m,2)==0 || rem(n,2)==0
+                if rem(m,2)==0
+                    X_hat = imresize(X_hat,[2*m 2*n-1]);
+                else
+                    X_hat = imresize(X_hat,[2*m-1 2*n]);
+                end
             end
         end
     end
     
-    output = X_hat;
-    %%                         
+    output = X_hat;    
 end
