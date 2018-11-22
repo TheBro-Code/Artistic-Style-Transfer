@@ -6,8 +6,7 @@ tic;
 % reading content and style image
 
 content_img = imread('../images/content/house 2-small.jpg');
-style_img = imread('../images/styles/derschrei.jpg');
-
+style_img = imread('../images/styles/night2.jpg');
 % segmentation mask 
 
 threshold = 0.03;
@@ -48,6 +47,7 @@ stylised_result = style_transfer(content_img, ...
                                  patch_sizes, ...
                                  sub_sampling_gaps, ...
                                  IRLS_itr,I_alg,r);
+
 
 subplot(1,3,1), imagesc(content_img);
 subplot(1,3,2), imagesc(style_img);
