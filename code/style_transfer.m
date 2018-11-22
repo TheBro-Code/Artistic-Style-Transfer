@@ -58,7 +58,7 @@ function output = style_transfer(content_img, ...
     
     %% Initialise X as content_init + high noise
     
-    X = content_pyramid{1} + sqrt(50*max(max(max(content_pyramid{1})))/256)*randn(size(content_pyramid{1}));
+    X = content_pyramid{1} + 0.2*randn(size(content_pyramid{1}));
     X = reshape(X,[],1); % make X (3Nc x 1)
     
     %%
