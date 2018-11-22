@@ -2,6 +2,8 @@
 
 function output = style_transfer(content_img, ...
                                  style_img, ...
+                                 hall_img, ...
+                                 hall_coeff, ...
                                  L_max, ...
                                  seg_mask, ...
                                  patch_sizes, ...
@@ -68,19 +70,25 @@ function output = style_transfer(content_img, ...
     %% Initialise X as content_init + high noise
     disp('Initialising Content Image with High Noise');
     X = content_pyramid{1} + max(content_pyramid{1}(:))*randn(size(content_pyramid{1}));
-    X = reshape(X,[],1); % make X (3Nc x 1)
     
     %%
-    disp('Starting Style Transfer ...')
+    disp('Starting Style Transfer - ')
     % Loop over scales 
     X_hat = X;
     for i = 1:L_max
+        
+        hall_img_scaled = imresize(hall_img,1/scale_array(i));
         
         % Loop over Patch-sizes
         for j = 1:length(patch_sizes)
             
             disp(strcat('Resolution Layer' , int2str(i) , ' , Patch Size' , int2str(patch_sizes(j))));
             for k = 1:I_alg
+                
+                X_hat = reshape(X_hat,[],1); % make X (3Nc x 1)
+
+                % Style Transfer
+                X_hat = hall_coeff*hall_img_scaled(:) + (1 - hall_coeff)*X_hat;
                 
                 % Robust Aggregation
                 X_tilda = irls(X_hat, ...
@@ -102,25 +110,25 @@ function output = style_transfer(content_img, ...
 %                 [thr,sorh,keepapp] = ddencmp('den','wv',X_hat);
 %                 X_hat = wdencmp('gbl',X_hat,'sym4',2,thr,sorh,keepapp);
                 X_hat = RF(X_hat, sigma_s, sigma_r);
-                X_hat = reshape(X_hat, [], 1);
+                
             end
         end
         
         % Scale Up
         if (i~=L_max)
             X_hat = reshape(X_hat, size(content_pyramid{i}));
-            [m,n,~] = size(X_hat);
+%             [m,n,~] = size(X_hat);
 %             X_hat = impyramid(X_hat, 'expand');
-            X_hat = imresize(X_hat,scale_array(i));
-            if rem(m,2)==0 && rem(n,2)==0
-                X_hat = imresize(X_hat,[2*m 2*n]);
-            elseif rem(m,2)==0 || rem(n,2)==0
-                if rem(m,2)==0
-                    X_hat = imresize(X_hat,[2*m 2*n-1]);
-                else
-                    X_hat = imresize(X_hat,[2*m-1 2*n]);
-                end
-            end
+%             if rem(m,2)==0 && rem(n,2)==0
+%                 X_hat = imresize(X_hat,[2*m 2*n]);
+%             elseif rem(m,2)==0 || rem(n,2)==0
+%                 if rem(m,2)==0
+%                     X_hat = imresize(X_hat,[2*m 2*n-1]);
+%                 else
+%                     X_hat = imresize(X_hat,[2*m-1 2*n]);
+%                 end
+%             end
+            X_hat = imresize(X_hat,2);
         end
         
     end
