@@ -1,4 +1,4 @@
-function X_tilda = irls(X,style_patch,patch_size,r,IRLS_itr,size_inp,sub_sampling_gap)
+function X_tilda = irls1(X,style_patch,patch_size,r,IRLS_itr,size_inp,sub_sampling_gap,R)
 
 
     h = size_inp(1);
@@ -11,8 +11,10 @@ function X_tilda = irls(X,style_patch,patch_size,r,IRLS_itr,size_inp,sub_samplin
 %     mean_data = style_patch{3};
     
     X_itr = X;
+    unsampled_pixs=double(~(sum(R,2)>0));
     
     for i = 1:IRLS_itr
+        
         X_itr = reshape(X_itr, size_inp);
         
         R_1 = im2col(X_itr(:,:,1),[patch_size,patch_size]);
@@ -29,23 +31,22 @@ function X_tilda = irls(X,style_patch,patch_size,r,IRLS_itr,size_inp,sub_samplin
         [Id,D] = nearest_neighbour(double(style_patch),double(R_new));
         w_itr = (D+1e-9).^(r-2);
         
-        term1 = zeros(d*w*h,1);
-        term2 = zeros(d*w*h,1);
+        % prevent black bars
+        term1 = unsampled_pixs;
+        term2 = X_itr.*unsampled_pixs;
                 
         for j = 1:num_patches
-            R_j = patch_transform(size_inp,patch_size,j,sub_sampling_gap);
-            temp = zeros(d*w*h,1);
-            temp(R_j) = 1;
-            term1 = term1 + w_itr(j)*temp;
-            term2(R_j) = term2(R_j) + w_itr(j)*style_patch(:,Id(j));
+            R_j = R(:,i);
+            term1 = term1 + w_itr(j)*double(R_j);
+            R_j(logical(R_j)) = style_patch(:,Id(j));
+            term2 = term2 + w_itr(j)*R_j;
         end
         
-%       % Prevent Black Bars
-        term1(term1 == 0) = 1;
-        term2(term2 == 0) = X_itr(term2 == 0);
         
         X_itr = term2./(term1 + 1e-7);
+        
     end
+    
     X_tilda = X_itr;
     
 end
