@@ -8,12 +8,17 @@ function output = style_transfer(content_img, ...
                                  sub_sampling_gaps, ...
                                  IRLS_itr,I_alg,r)
     %% Initialisation
+    disp('Initialising Variables');
     content_img = im2double(content_img);
     style_img = im2double(style_img);
     content_init = imhistmatch(content_img,style_img);
+    scale_array = 2.^(L_max-1:-1:0);
+    sigma_s = 5;
+    sigma_r = 0.2;
     
     %% Building Gaussian Pyramid of depth L_max
     
+    disp('Building Gaussian Pyramid');
     content_pyramid = cell(L_max,1);
     content_pyramid{L_max} = content_init;
     
@@ -24,17 +29,21 @@ function output = style_transfer(content_img, ...
     seg_mask_pyramid{L_max} = seg_mask;
     
     for i = L_max - 1 : -1 : 1
-    content_pyramid{i} = impyramid(content_pyramid{i+1},'reduce');
-    style_pyramid{i} = impyramid(style_pyramid{i+1},'reduce');
-    seg_mask_pyramid{i} = impyramid(seg_mask_pyramid{i+1},'reduce');
+%     content_pyramid{i} = impyramid(content_pyramid{i+1},'reduce');
+%     style_pyramid{i} = impyramid(style_pyramid{i+1},'reduce');
+%     seg_mask_pyramid{i} = impyramid(seg_mask_pyramid{i+1},'reduce');
+      content_pyramid{i} = imresize(content_init,1/scale_array(i));
+      style_pyramid{i} = imresize(style_img,1/scale_array(i));
+      seg_mask_pyramid{i} = imresize(seg_mask,1/scale_array(i));
     end
     
     %% Building patch_matrices for style image for all L,n
-    
+    disp('Building Patches for Style Matrix');
     style_patch = cell(L_max,length(patch_sizes));
     for i = 1 : L_max
         for j = 1 : length(patch_sizes)
-            [h,w,d] = size(style_pyramid{i});
+            
+            [h,w,~] = size(style_pyramid{i});
             
             img1 = im2col(style_pyramid{i}(:,:,1), ...
                     [patch_sizes(j),patch_sizes(j)]);
@@ -57,37 +66,52 @@ function output = style_transfer(content_img, ...
     end
     
     %% Initialise X as content_init + high noise
-    
-    X = content_pyramid{1} + 0.2*randn(size(content_pyramid{1}));
+    disp('Initialising Content Image with High Noise');
+    X = content_pyramid{1} + 0.5*randn(size(content_pyramid{1}));
     X = reshape(X,[],1); % make X (3Nc x 1)
     
     %%
+    disp('Starting Style Transfer ...')
     % Loop over scales 
     X_hat = X;
-    
     for i = 1:L_max
+        
         % Loop over Patch-sizes
-
         for j = 1:length(patch_sizes)
-
+            
+            disp(strcat('Resolution Layer' , int2str(i) , ' , Patch Size' , int2str(patch_sizes(j))));
             for k = 1:I_alg
-                X_tilda = irls(X_hat,style_patch{i,j},patch_sizes(j),r,...
-                    IRLS_itr,size(content_pyramid{i}),sub_sampling_gaps(j));
                 
+                % Robust Aggregation
+                X_tilda = irls(X_hat, ...
+                               style_patch{i,j}, ...
+                               patch_sizes(j),r,...
+                               IRLS_itr, ...
+                               size(content_pyramid{i}), ...
+                               sub_sampling_gaps(j));
+                
+                % Content Fusion
                 mask = repmat(reshape(seg_mask_pyramid{i},[],1), 3, 1);
                 X_hat = (X_tilda + double(mask).*double(reshape(content_pyramid{i},[],1)))./(mask + ones(size(mask)));
+                
+                % Color Transfer
                 X_hat = imhistmatch(reshape(X_hat, ...
                     size(content_pyramid{i})), style_pyramid{i});
-                [thr,sorh,keepapp] = ddencmp('den','wv',X_hat);
-                X_hat = wdencmp('gbl',X_hat,'sym4',2,thr,sorh,keepapp);
+                
+                % Denoising
+%                 [thr,sorh,keepapp] = ddencmp('den','wv',X_hat);
+%                 X_hat = wdencmp('gbl',X_hat,'sym4',2,thr,sorh,keepapp);
+                X_hat = RF(X_hat, sigma_s, sigma_r);
                 X_hat = reshape(X_hat, [], 1);
             end
-            
         end
+        
+        % Scale Up
         if (i~=L_max)
             X_hat = reshape(X_hat, size(content_pyramid{i}));
-            [m,n,d] = size(X_hat);
-            X_hat = impyramid(X_hat, 'expand');
+            [m,n,~] = size(X_hat);
+%             X_hat = impyramid(X_hat, 'expand');
+            X_hat = imresize(X_hat,scale_array(i));
             if rem(m,2)==0 && rem(n,2)==0
                 X_hat = imresize(X_hat,[2*m 2*n]);
             elseif rem(m,2)==0 || rem(n,2)==0
@@ -98,6 +122,7 @@ function output = style_transfer(content_img, ...
                 end
             end
         end
+        
     end
     
     output = X_hat;    

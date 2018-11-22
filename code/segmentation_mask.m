@@ -7,5 +7,4 @@ function mask = segmentation_mask(content,threshold,sigma1,sigma2)
     mask = mask > mean2(mask);
     mask = activecontour(content,mask);
     mask = imgaussfilt(double(mask+10*edgy_content),sigma2);
-    imagesc(mask);
 end

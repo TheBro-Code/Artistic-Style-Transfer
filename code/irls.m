@@ -34,12 +34,16 @@ function X_tilda = irls(X,style_patch,patch_size,r,IRLS_itr,size_inp,sub_samplin
                 
         for j = 1:num_patches
             R_j = patch_transform(size_inp,patch_size,j,sub_sampling_gap);
-            temp1 = zeros(d*w*h,1);
-            temp1(R_j) = 1;
-            term1 = term1 + w_itr(j)*temp1;
-            temp2 = style_patch(:,Id(j));
-            term2(R_j) = term2(R_j) + w_itr(j)*temp2;
+            temp = zeros(d*w*h,1);
+            temp(R_j) = 1;
+            term1 = term1 + w_itr(j)*temp;
+            term2(R_j) = term2(R_j) + w_itr(j)*style_patch(:,Id(j));
         end
+        
+%         % Prevent Black Bars
+        term1(term1 == 0) = 1;
+        term2(term2 == 0) = X_itr(term2 == 0);
+        
         X_itr = term2./(term1 + 1e-7);
     end
     X_tilda = X_itr;

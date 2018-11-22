@@ -2,11 +2,13 @@ clear; clc;
 tic;
 
 %% Inputs
+
+addpath('DomainTransformFilters-Source-v1.0/');
  
 % reading content and style image
 
 content_img = imread('../images/content/house 2-small.jpg');
-style_img = imread('../images/styles/night2.jpg');
+style_img = imread('../images/styles/starry-night - small.jpg');
 % segmentation mask 
 
 threshold = 0.03;
@@ -20,7 +22,7 @@ L_max = 3;
 
 % patch sizes
 
-patch_sizes = [33;21;13;9];
+patch_sizes = [22;13;9];
 
 % sub_sampling gaps
 
@@ -49,9 +51,9 @@ stylised_result = style_transfer(content_img, ...
                                  IRLS_itr,I_alg,r);
 
 
-subplot(1,3,1), imagesc(content_img);
-subplot(1,3,2), imagesc(style_img);
-subplot(1,3,3), imagesc(reshape(stylised_result,size(content_img)));
+subplot(2,3,1), imagesc(content_img);
+subplot(2,3,2), imagesc(style_img);
+subplot(2,3,3), imagesc(reshape(stylised_result,size(content_img)));
 
 %%
 toc;
