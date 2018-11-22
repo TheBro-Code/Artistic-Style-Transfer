@@ -6,7 +6,7 @@ tic;
 % reading content and style image
 
 content_img = imread('../images/content/house 2-small.jpg');
-style_img = imread('../images/styles/starry-night - small.jpg');
+style_img = imread('../images/styles/derschrei.jpg');
 
 % segmentation mask 
 
@@ -29,7 +29,7 @@ sub_sampling_gaps = [28;18;8;5];
 
 % Number of IRLS iterations
 
-IRLS_itr = 10;
+IRLS_itr = 5;
 
 % number of update iterations per patch-size
 
@@ -51,7 +51,7 @@ stylised_result = style_transfer(content_img, ...
 
 subplot(1,3,1), imagesc(content_img);
 subplot(1,3,2), imagesc(style_img);
-subplot(1,3,3), imagesc(stylised_result);
+subplot(1,3,3), imagesc(reshape(stylised_result,size(content_img)));
 
 %%
 toc;

@@ -7,18 +7,20 @@ function output = style_transfer(content_img, ...
                                  patch_sizes, ...
                                  sub_sampling_gaps, ...
                                  IRLS_itr,I_alg,r)
-    %% Initialisation                          
+    %% Initialisation
+    content_img = im2double(content_img);
+    style_img = im2double(style_img);
     content_init = imhistmatch(content_img,style_img);
     
     %% Building Gaussian Pyramid of depth L_max
     
-    content_pyramid = cell(L_max);
+    content_pyramid = cell(L_max,1);
     content_pyramid{L_max} = content_init;
     
-    style_pyramid = cell(L_max);
+    style_pyramid = cell(L_max,1);
     style_pyramid{L_max} = style_img;
     
-    seg_mask_pyramid = cell(L_max);
+    seg_mask_pyramid = cell(L_max,1);
     seg_mask_pyramid{L_max} = seg_mask;
     
     for i = L_max - 1 : -1 : 1
@@ -56,7 +58,7 @@ function output = style_transfer(content_img, ...
     
     %% Initialise X as content_init + high noise
     
-    X = double(content_pyramid{1}) + sqrt(50)*randn(size(content_pyramid{1,1}));
+    X = content_pyramid{1} + sqrt(50*max(max(max(content_pyramid{1})))/256)*randn(size(content_pyramid{1}));
     X = reshape(X,[],1); % make X (3Nc x 1)
     
     %%
@@ -65,9 +67,9 @@ function output = style_transfer(content_img, ...
     
     for i = 1:L_max
         % Loop over Patch-sizes
-        resolution_level = i
+
         for j = 1:length(patch_sizes)
-            patch_no = j
+
             for k = 1:I_alg
                 X_tilda = irls(X_hat,style_patch{i,j},patch_sizes(j),r,...
                     IRLS_itr,size(content_pyramid{i}),sub_sampling_gaps(j));
