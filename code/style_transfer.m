@@ -82,9 +82,13 @@ function output = style_transfer(content_img, ...
         % Loop over Patch-sizes
         for j = 1:length(patch_sizes)
             
+            if(i > 1 && j > 1)
+                continue;
+            end
+            
             disp(strcat('Resolution Layer' , int2str(i) , ' , Patch Size' , int2str(patch_sizes(j))));
             for k = 1:I_alg
-                
+                    
                 X_hat = reshape(X_hat,[],1); % make X (3Nc x 1)
 
                 % Style Transfer
@@ -99,7 +103,9 @@ function output = style_transfer(content_img, ...
                                sub_sampling_gaps(j));
                 
                 % Content Fusion
-                mask = repmat(reshape(seg_mask_pyramid{i},[],1), 3, 1);
+%                 mask = repmat(reshape(seg_mask_pyramid{i},[],1), 3, 1);
+%                 X_hat = (X_tilda + double(mask).*double(reshape(content_pyramid{i},[],1)))./(mask + ones(size(mask)));
+                mask = repmat(1.5*seg_mask_pyramid{i}(:)/max(seg_mask_pyramid{i}(:)),3,1);
                 X_hat = (X_tilda + double(mask).*double(reshape(content_pyramid{i},[],1)))./(mask + ones(size(mask)));
                 
                 % Color Transfer

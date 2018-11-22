@@ -40,7 +40,7 @@ function X_tilda = irls(X,style_patch,patch_size,r,IRLS_itr,size_inp,sub_samplin
             term2(R_j) = term2(R_j) + w_itr(j)*style_patch(:,Id(j));
         end
         
-%         % Prevent Black Bars
+%       % Prevent Black Bars
         term1(term1 == 0) = 1;
         term2(term2 == 0) = X_itr(term2 == 0);
         
