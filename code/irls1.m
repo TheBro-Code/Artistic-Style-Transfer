@@ -30,15 +30,17 @@ function X_tilda = irls1(X,style_patch,patch_size,r,IRLS_itr,size_inp,sub_sampli
 %         R_new = R_new(:,1:sub_sampling_gap:end,1:sub_sampling_gap:end);
 %         R_new = reshape(R_new,3*patch_size*patch_size,[]);
             
-          R_new = zeros(3*p*p,num_patches);
-          
+          R_new = zeros(3*patch_size*patch_size,num_patches);
+
           for j = 1:num_patches
               R_new(:,j) = X_itr(logical(R(:,j)));
           end
-          
+
 %         R_new = R_new - repmat(mean_data,[1,size(R_new,2)]);
 %         R_eig = (proj_mat')*R_new;
+        tic;
         [Id,D] = nearest_neighbour(double(style_patch),double(R_new));
+        toc;    
         
         w_itr = (D+1e-9).^(r-2);
         
@@ -46,12 +48,15 @@ function X_tilda = irls1(X,style_patch,patch_size,r,IRLS_itr,size_inp,sub_sampli
         term1 = unsampled_pixs;
         term2 = X_itr(:).*unsampled_pixs;
                 
+        tic;
         for j = 1:num_patches
             R_j = double(R(:,j));
+            tic;
             term1 = term1 + w_itr(j)*R_j;
             R_j(logical(R_j)) = style_patch(:,Id(j));
             term2 = term2 + w_itr(j)*R_j;
         end
+        toc;
         
         
         X_itr = term2./(term1 + 1e-7);

@@ -65,10 +65,10 @@ function output = style_transfer(content_img, ...
             img = img(:,1:5:end,1:5:end);
             img = reshape(img,3*patch_sizes(j)*patch_sizes(j),[]);
             
-            pca_dimension = 75;
-            style_patch{i,j} = pca_reduction(img,pca_dimension);
+%             pca_dimension = 75;
+%             style_patch{i,j} = pca_reduction(img,pca_dimension);
 
-%             style_patch{i,j} = img;
+            style_patch{i,j} = img;
              
         end
     end
