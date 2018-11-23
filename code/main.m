@@ -8,7 +8,7 @@ addpath('DomainTransformFilters-Source-v1.0/');
 % reading content and style image
 
 content_img = imread('../images/content/eagles.jpg');
-style_img = imread('../images/styles/derschrei.jpg');
+style_img = imread('../images/styles/starry-night - small.jpg');
 imsize = size(content_img);
 % segmentation mask 
 
@@ -23,7 +23,7 @@ L_max = 3;
 
 % patch sizes
 
-patch_sizes = [36;22;13];
+patch_sizes = [36;22;13;9];
 
 % sub_sampling gaps
 

@@ -33,7 +33,7 @@ function X_tilda = irls1(X,style_patch,patch_size,r,IRLS_itr,size_inp,sub_sampli
         
         % prevent black bars
         term1 = unsampled_pixs;
-        term2 = X_itr.*unsampled_pixs;
+        term2 = X_itr(:).*unsampled_pixs;
                 
         for j = 1:num_patches
             R_j = R(:,i);

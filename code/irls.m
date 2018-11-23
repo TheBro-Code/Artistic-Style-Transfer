@@ -42,7 +42,7 @@ function X_tilda = irls(X,style_patch,patch_size,r,IRLS_itr,size_inp,sub_samplin
         
 %       % Prevent Black Bars
         term1(term1 == 0) = 1;
-        term2(term2 == 0) = X_itr(term2 == 0);
+        term2(term2 == 0) = X(term2 == 0);
         
         X_itr = term2./(term1 + 1e-7);
     end
