@@ -44,25 +44,31 @@ function output = style_transfer(content_img, ...
     style_patch = cell(L_max,length(patch_sizes));
     for i = 1 : L_max
         for j = 1 : length(patch_sizes)
-            
             [h,w,~] = size(style_pyramid{i});
+             
+            p_size = patch_sizes(j)*patch_sizes(j);
             
-            img1 = im2col(style_pyramid{i}(:,:,1), ...
+            img = zeros(3*p_size, ...
+                (h-patch_sizes(j)+1)*(w-patch_sizes(j)+1));
+            
+            img(1:p_size, :) = im2col(style_pyramid{i}(:,:,1), ...
                     [patch_sizes(j),patch_sizes(j)]);
             
-            img2 = im2col(style_pyramid{i}(:,:,2), ... 
+            img(p_size+1:2*p_size,:) = im2col(style_pyramid{i}(:,:,2), ... 
                     [patch_sizes(j),patch_sizes(j)]);
             
-            img3 = im2col(style_pyramid{i}(:,:,3), ... 
+            img(2*p_size+1:3*p_size, :) = im2col(style_pyramid{i}(:,:,3), ... 
                     [patch_sizes(j),patch_sizes(j)]);
-            
-            img = [img1;img2;img3];
+                
             img = reshape(img,3*patch_sizes(j)*patch_sizes(j),(h-patch_sizes(j)+1),(w-patch_sizes(j)+1));
+          
             img = img(:,1:5:end,1:5:end);
             img = reshape(img,3*patch_sizes(j)*patch_sizes(j),[]);
-%             pca_dimension = 75;
-%             style_patch{i,j} = pca_reduction(img,pca_dimension);
-            style_patch{i,j} = img;
+            
+            pca_dimension = 75;
+            style_patch{i,j} = pca_reduction(img,pca_dimension);
+
+%             style_patch{i,j} = img;
              
         end
     end
@@ -86,41 +92,51 @@ function output = style_transfer(content_img, ...
                 continue;
             end
             
-%             [h,w,d] = size(content_pyramid{i});
-%             num_patches = (floor((h-patch_sizes(j))/sub_sampling_gaps(j))+1)*(floor((w-patch_sizes(j))/sub_sampling_gaps(j))+1);
-%             R = false(h*w*d,num_patches);
-%             
-%             for row = 1:sub_sampling_gaps(j):h-patch_sizes(j)
-%                 for col = 1:sub_sampling_gaps(j):w-patch_sizes(j)
-%                     
-%                     x = (col-1)/sub_sampling_gaps(j);
-%                     y = floor((h-patch_sizes(j))/sub_sampling_gaps(j))+1;
-%                     z = (row-1)/sub_sampling_gaps(j) + 1;
-%                     patch_num = x*y + z;
-% 
-%                     sample_patch = false(h,w,d);
-%                     sample_patch(row:row+patch_sizes(j)-1,col:col+patch_sizes(j)-1,:) = true;
-%                     R(:,patch_num) = sample_patch(:);
-%                     
-%                 end
-%             end
+            
+            disp('Creating R -');
+            tic;
+            [h,w,d] = size(content_pyramid{i});
+            num_patches = (floor((h-patch_sizes(j))/sub_sampling_gaps(j))+1)*(floor((w-patch_sizes(j))/sub_sampling_gaps(j))+1);
+            R = false(h*w*d,num_patches);
+            
+            for row = 1:sub_sampling_gaps(j):h-patch_sizes(j)+1
+                for col = 1:sub_sampling_gaps(j):w-patch_sizes(j)+1
+                    
+                    x = (col-1)/sub_sampling_gaps(j);
+                    y = floor((h-patch_sizes(j))/sub_sampling_gaps(j))+1;
+                    z = (row-1)/sub_sampling_gaps(j) + 1;
+                    patch_num = x*y + z;
+
+                    sample_patch = false(h,w,d);
+                    sample_patch(row:row+patch_sizes(j)-1,col:col+patch_sizes(j)-1,:) = true;
+                    R(:,patch_num) = sample_patch(:);
+                    
+                end
+            end
+            toc;
             
             disp(strcat('Resolution Layer' , int2str(i) , ' , Patch Size' , int2str(patch_sizes(j))));
             for k = 1:I_alg
-                    
+                
+                tic;
                 X_hat = reshape(X_hat,[],1); % make X (3Nc x 1)
+                toc;
 
                 % Style Transfer
+                tic;
                 X_hat = hall_coeff*hall_img_scaled(:) + (1 - hall_coeff)*X_hat;
+                toc;
                 
                 % Robust Aggregation
-                
-                X_tilda = irls(X_hat, ...
+                disp('Doing ISLR');
+                tic;
+                X_tilda = irls1(X_hat, ...
                                style_patch{i,j}, ...
                                patch_sizes(j),r,...
                                IRLS_itr, ...
                                size(content_pyramid{i}), ...
-                               sub_sampling_gaps(j));
+                               sub_sampling_gaps(j), R);
+                toc;
 
 %                    X_tilda = irls1(X_hat, ...
 %                                    style_patch{i,j}, ...
