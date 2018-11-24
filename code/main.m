@@ -66,9 +66,9 @@ stylised_result = style_transfer(content_img, ...
                                  IRLS_itr,I_alg,r);
 
 figure;
-% subplot(2,3,1), imagesc(content_img);
+subplot(2,3,1), imagesc(content_img);
 subplot(1,2,1), imshow(style_img);
-subplot(1,2,2), imagesc(reshape(hall_img,size(content_img)));
+subplot(1,2,2), imagesc(reshape(stylised_result,size(content_img)));
 
 %%
 toc;
