@@ -7,8 +7,8 @@ addpath('DomainTransformFilters-Source-v1.0/');
  
 % reading content and style image
 
-content_img = imread('../images/content/eagles.jpg');
-style_img = imread('../images/styles/starry-night - small.jpg');
+content_img = imread('../images/content/venice-boat.jpg');
+style_img = imread('../images/styles/derschrei.jpg');
 imsize = size(content_img);
 % segmentation mask 
 
@@ -67,7 +67,7 @@ stylised_result = style_transfer(content_img, ...
 
 figure;
 subplot(2,3,1), imagesc(content_img);
-subplot(2,3,2), imagesc(style_img);
+subplot(2,3,2), imshow(style_img);
 subplot(2,3,3), imagesc(reshape(stylised_result,size(content_img)));
 
 %%
