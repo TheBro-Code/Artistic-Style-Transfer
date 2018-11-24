@@ -8,7 +8,7 @@ addpath('DomainTransformFilters-Source-v1.0/');
 % reading content and style image
 
 content_img = imread('../images/content/venice-boat.jpg');
-style_img = imread('../images/styles/derschrei.jpg');
+style_img = imread('../images/styles/feathers.jpg');
 imsize = size(content_img);
 % segmentation mask 
 
@@ -44,7 +44,7 @@ r = 0.8;
 %% Style Transfer
 
 % disp('Computing Hallucinated Image ...');
-% hall_img = style_transfer(imgaussfilt(content_img,100), ...
+% hall_img = style_transfer(ones(size(content_img)), ...
 %                           style_img, ...
 %                           ones(imsize), ...
 %                           0, ...
@@ -66,9 +66,9 @@ stylised_result = style_transfer(content_img, ...
                                  IRLS_itr,I_alg,r);
 
 figure;
-subplot(2,3,1), imagesc(content_img);
-subplot(2,3,2), imshow(style_img);
-subplot(2,3,3), imagesc(reshape(stylised_result,size(content_img)));
+% subplot(2,3,1), imagesc(content_img);
+subplot(1,2,1), imshow(style_img);
+subplot(1,2,2), imagesc(reshape(hall_img,size(content_img)));
 
 %%
 toc;
