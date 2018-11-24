@@ -23,7 +23,7 @@ L_max = 3;
 
 % patch sizes
 
-patch_sizes = [36;22;13;9];
+patch_sizes = [22;13;9];
 
 % sub_sampling gaps
 

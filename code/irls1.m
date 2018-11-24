@@ -34,12 +34,15 @@ function X_tilda = irls1(X,style_patch,pca_out,patch_size,r,IRLS_itr,size_inp,su
         term1 = unsampled_pixs;
         term2 = X_itr(:).*unsampled_pixs;
                 
+        tic;
         for j = 1:num_patches
             R_j = double(R(:,j));
+            tic;
             term1 = term1 + w_itr(j)*R_j;
             R_j(logical(R_j)) = style_patch(:,Id(j));
             term2 = term2 + w_itr(j)*R_j;
         end
+        toc;
         
         X_itr = term2./(term1 + 1e-7);
         
